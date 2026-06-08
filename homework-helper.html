@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>מטלות שלי</title>
+<meta name="theme-color" content="#1a1a2e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="מטלות שלי">
+
+<!-- Google Identity Services -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap');
+
+:root {
+  --bg: #0d0d1a;
+  --surface: #16162a;
+  --card: #1e1e38;
+  --border: #2a2a4a;
+  --accent: #6c63ff;
+  --accent2: #ff6584;
+  --accent3: #43e97b;
+  --text: #e8e8f0;
+  --text-dim: #8888aa;
+  --done-bg: #1a2e1a;
+  --done-border: #2a4a2a;
+  --shadow: 0 8px 32px rgba(0,0,0,0.4);
+  --radius: 16px;
+  --radius-sm: 10px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: 'Heebo', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+
+/* ── BG GRADIENT ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: -1;
+  background:
+    radial-gradient(ellipse 80% 50% at 20% 0%, rgba(108,99,255,0.15) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 100%, rgba(255,101,132,0.10) 0%, transparent 60%),
+    var(--bg);
+}
+
+/* ── SCREENS ── */
+.screen { display: none; min-height: 100dvh; flex-direction: column; }
+.screen.active { display: flex; }
+
+/* ── LOGIN ── */
+#loginScreen {
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px;
+  text-align: center;
+  gap: 0;
+}
+
+.logo-wrap {
+  width: 88px; height: 88px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border-radius: 28px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 40px;
+  margin: 0 auto 28px;
+  box-shadow: 0 12px 40px rgba(108,99,255,0.4);
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.login-title { font-size: 32px; font-weight: 900; margin-bottom: 8px; line-height: 1.1; }
+.login-sub { font-size: 15px; color: var(--text-dim); margin-bottom: 48px; }
+.login-title span { color: var(--accent); }
+
+.google-btn {
+  display: flex; align-items: center; gap: 12px;
+  background: white; color: #333;
+  border: none; border-radius: 14px;
+  padding: 14px 28px;
+  font-size: 16px; font-weight: 600;
+  font-family: 'Heebo', sans-serif;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  transition: transform .15s, box-shadow .15s;
+  margin: 0 auto;
+}
+.google-btn:active { transform: scale(0.97); }
+.google-btn img { width: 22px; }
+
+.login-note {
+  margin-top: 20px;
+  font-size: 12px;
+  color: var(--text-dim);
+  max-width: 280px;
+  line-height: 1.6;
+}
+
+/* ── LOADING ── */
+#loadingScreen {
+  align-items: center; justify-content: center; gap: 16px;
+}
+.spinner {
+  width: 48px; height: 48px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text { color: var(--text-dim); font-size: 15px; }
+
+/* ── MAIN APP ── */
+#appScreen { padding-bottom: 80px; }
+
+/* Header */
+.header {
+  position: sticky; top: 0; z-index: 100;
+  padding: 16px 20px 12px;
+  background: rgba(13,13,26,0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+.header-top {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 14px;
+}
+.header-title { font-size: 22px; font-weight: 900; }
+.header-title span { color: var(--accent); }
+
+.user-pill {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--card); border-radius: 999px;
+  padding: 6px 12px 6px 6px;
+  font-size: 13px; cursor: pointer;
+  border: 1px solid var(--border);
+}
+.user-avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; overflow: hidden;
+}
+.user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+/* Stats bar */
+.stats-bar {
+  display: flex; gap: 8px;
+}
+.stat-chip {
+  flex: 1;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 8px 10px;
+  text-align: center;
+}
+.stat-num { font-size: 18px; font-weight: 700; color: var(--accent); }
+.stat-lbl { font-size: 10px; color: var(--text-dim); margin-top: 1px; }
+
+/* Filters */
+.filters {
+  display: flex; gap: 8px;
+  padding: 12px 20px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.filters::-webkit-scrollbar { display: none; }
+
+.filter-btn {
+  flex-shrink: 0;
+  padding: 7px 16px;
+  border-radius: 999px;
+  border: 1.5px solid var(--border);
+  background: transparent;
+  color: var(--text-dim);
+  font-size: 13px;
+  font-family: 'Heebo', sans-serif;
+  cursor: pointer;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.filter-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+  font-weight: 600;
+}
+
+/* Assignment list */
+.assignments { padding: 4px 16px; }
+
+.day-group { margin-bottom: 20px; }
+.day-label {
+  font-size: 12px; font-weight: 700;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 0 4px 8px;
+  display: flex; align-items: center; gap: 8px;
+}
+.day-label::after {
+  content: '';
+  flex: 1; height: 1px;
+  background: var(--border);
+}
+
+/* Card */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  position: relative;
+  overflow: hidden;
+  transition: transform .15s, opacity .3s;
+  cursor: pointer;
+}
+.card::before {
+  content: '';
+  position: absolute;
+  right: 0; top: 0; bottom: 0;
+  width: 4px;
+  background: var(--subject-color, var(--accent));
+}
+.card.done {
+  background: var(--done-bg);
+  border-color: var(--done-border);
+  opacity: 0.6;
+}
+.card.done .card-title { text-decoration: line-through; color: var(--text-dim); }
+.card:active { transform: scale(0.98); }
+
+.card-top {
+  display: flex; align-items: flex-start; gap: 12px;
+  margin-bottom: 8px;
+}
+.check-btn {
+  width: 26px; height: 26px; flex-shrink: 0;
+  border-radius: 8px;
+  border: 2px solid var(--subject-color, var(--accent));
+  background: transparent;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .15s;
+  margin-top: 1px;
+}
+.card.done .check-btn {
+  background: var(--subject-color, var(--accent));
+}
+.check-btn svg { display: none; }
+.card.done .check-btn svg { display: block; }
+
+.card-info { flex: 1; min-width: 0; }
+.card-subject {
+  font-size: 11px; font-weight: 700;
+  color: var(--subject-color, var(--accent));
+  text-transform: uppercase; letter-spacing: 0.5px;
+  margin-bottom: 3px;
+}
+.card-title { font-size: 15px; font-weight: 500; line-height: 1.3; }
+.card-desc { font-size: 13px; color: var(--text-dim); margin-top: 4px; line-height: 1.4; }
+
+.card-bottom {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 10px;
+}
+.card-due {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+.card-due.urgent { color: var(--accent2); }
+.card-due.today { color: #ffd166; }
+
+.remind-btn {
+  display: flex; align-items: center; gap: 5px;
+  background: rgba(108,99,255,0.12);
+  border: 1px solid rgba(108,99,255,0.25);
+  border-radius: 8px;
+  padding: 5px 10px;
+  font-size: 12px; color: var(--accent);
+  font-family: 'Heebo', sans-serif;
+  cursor: pointer;
+  transition: all .15s;
+}
+.remind-btn.set {
+  background: rgba(67,233,123,0.1);
+  border-color: rgba(67,233,123,0.3);
+  color: var(--accent3);
+}
+.remind-btn:active { transform: scale(0.96); }
+
+/* Source badge */
+.source-badge {
+  position: absolute;
+  top: 10px; left: 14px;
+  font-size: 10px;
+  color: var(--text-dim);
+  background: var(--surface);
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+
+/* Empty state */
+.empty {
+  text-align: center;
+  padding: 60px 32px;
+  color: var(--text-dim);
+}
+.empty-icon { font-size: 52px; margin-bottom: 12px; }
+.empty-text { font-size: 16px; }
+
+/* ── REMINDER MODAL ── */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(8px);
+  display: flex; align-items: flex-end;
+  opacity: 0; pointer-events: none;
+  transition: opacity .25s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+
+.modal {
+  width: 100%; max-height: 85dvh;
+  background: var(--surface);
+  border-radius: 28px 28px 0 0;
+  border: 1px solid var(--border);
+  border-bottom: none;
+  padding: 20px 20px 40px;
+  transform: translateY(100%);
+  transition: transform .3s cubic-bezier(.4,0,.2,1);
+  overflow-y: auto;
+}
+.modal-overlay.open .modal { transform: translateY(0); }
+
+.modal-handle {
+  width: 40px; height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  margin: 0 auto 20px;
+}
+.modal-title { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+.modal-sub { font-size: 13px; color: var(--text-dim); margin-bottom: 24px; }
+
+.time-options {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 10px; margin-bottom: 20px;
+}
+.time-opt {
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: all .15s;
+}
+.time-opt.selected {
+  border-color: var(--accent);
+  background: rgba(108,99,255,0.12);
+}
+.time-opt:active { transform: scale(0.97); }
+.time-opt-icon { font-size: 24px; margin-bottom: 4px; }
+.time-opt-lbl { font-size: 14px; font-weight: 500; }
+.time-opt-sub { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+
+.custom-time-row {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  margin-bottom: 20px;
+  cursor: pointer;
+}
+.custom-time-label { flex: 1; font-size: 14px; }
+.custom-time-input {
+  background: transparent;
+  border: none; outline: none;
+  color: var(--accent);
+  font-size: 14px; font-weight: 600;
+  font-family: 'Heebo', sans-serif;
+  text-align: left;
+  width: 130px;
+  cursor: pointer;
+}
+
+.modal-actions { display: flex; gap: 10px; }
+.btn-primary {
+  flex: 2;
+  background: linear-gradient(135deg, var(--accent), #8b80ff);
+  border: none; border-radius: var(--radius-sm);
+  color: white; font-size: 16px; font-weight: 700;
+  font-family: 'Heebo', sans-serif;
+  padding: 14px;
+  cursor: pointer;
+  transition: transform .15s;
+}
+.btn-primary:active { transform: scale(0.97); }
+.btn-secondary {
+  flex: 1;
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-dim); font-size: 15px;
+  font-family: 'Heebo', sans-serif;
+  padding: 14px;
+  cursor: pointer;
+}
+.btn-danger {
+  flex: 1;
+  background: rgba(255,101,132,0.1);
+  border: 1.5px solid rgba(255,101,132,0.3);
+  border-radius: var(--radius-sm);
+  color: var(--accent2); font-size: 15px;
+  font-family: 'Heebo', sans-serif;
+  padding: 14px;
+  cursor: pointer;
+}
+
+/* ── FAB ── */
+.fab {
+  position: fixed; bottom: 24px; left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, var(--accent), #8b80ff);
+  border: none; border-radius: 999px;
+  color: white; font-size: 14px; font-weight: 700;
+  font-family: 'Heebo', sans-serif;
+  padding: 14px 28px;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(108,99,255,0.5);
+  display: flex; align-items: center; gap: 8px;
+  transition: transform .15s;
+  z-index: 50;
+}
+.fab:active { transform: translateX(-50%) scale(0.97); }
+
+/* ── NOTIF BANNER (in-app toast) ── */
+.toast {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 300;
+  background: var(--accent);
+  color: white;
+  padding: 14px 20px 14px 20px;
+  font-size: 14px; font-weight: 500;
+  display: flex; align-items: center; gap: 10px;
+  transform: translateY(-100%);
+  transition: transform .3s cubic-bezier(.4,0,.2,1);
+  padding-top: calc(14px + env(safe-area-inset-top));
+}
+.toast.show { transform: translateY(0); }
+.toast-icon { font-size: 20px; flex-shrink: 0; }
+
+/* ── PERMISSION SCREEN ── */
+.perm-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin: 16px;
+  text-align: center;
+}
+.perm-icon { font-size: 40px; margin-bottom: 12px; }
+.perm-title { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+.perm-text { font-size: 13px; color: var(--text-dim); line-height: 1.6; margin-bottom: 16px; }
+</style>
+</head>
+<body>
+
+<!-- ── TOAST ── -->
+<div class="toast" id="toast">
+  <span class="toast-icon">🔔</span>
+  <span id="toastText">הודעה</span>
+</div>
+
+<!-- ── LOGIN ── -->
+<div class="screen active" id="loginScreen">
+  <div class="logo-wrap">📚</div>
+  <div class="login-title">מטלות<br><span>שלי</span></div>
+  <div class="login-sub">כל המטלות שלך, במקום אחד</div>
+
+  <button class="google-btn" id="googleSignInBtn" onclick="startGoogleSignIn()">
+    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+    התחבר עם Google
+  </button>
+
+  <!-- Demo mode for testing without real Google account -->
+  <button class="google-btn" style="margin-top:12px; background:#1e1e38; color:var(--text); border:1px solid var(--border);" onclick="loadDemoMode()">
+    🎯 נסה עם נתוני דמו
+  </button>
+
+  <p class="login-note">
+    האפליקציה תבקש גישה ל-Google Classroom שלך כדי להציג את המטלות.<br>
+    לא נשמר שום מידע מחוץ למכשיר שלך.
+  </p>
+</div>
+
+<!-- ── LOADING ── -->
+<div class="screen" id="loadingScreen">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loadingText">מתחבר ל-Google...</div>
+</div>
+
+<!-- ── MAIN APP ── -->
+<div class="screen" id="appScreen">
+
+  <div class="header">
+    <div class="header-top">
+      <div class="header-title">📚 מטלות <span>שלי</span></div>
+      <div class="user-pill" onclick="signOut()">
+        <div class="user-avatar" id="userAvatar">?</div>
+        <span id="userName">משתמש</span>
+      </div>
+    </div>
+    <div class="stats-bar">
+      <div class="stat-chip">
+        <div class="stat-num" id="statTotal">0</div>
+        <div class="stat-lbl">סה"כ</div>
+      </div>
+      <div class="stat-chip">
+        <div class="stat-num" style="color:var(--accent2)" id="statPending">0</div>
+        <div class="stat-lbl">ממתינות</div>
+      </div>
+      <div class="stat-chip">
+        <div class="stat-num" style="color:var(--accent3)" id="statDone">0</div>
+        <div class="stat-lbl">הושלמו</div>
+      </div>
+      <div class="stat-chip">
+        <div class="stat-num" style="color:#ffd166" id="statReminders">0</div>
+        <div class="stat-lbl">תזכורות</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="filters" id="filtersBar">
+    <button class="filter-btn active" data-filter="all" onclick="setFilter('all',this)">הכל</button>
+    <button class="filter-btn" data-filter="pending" onclick="setFilter('pending',this)">ממתינות</button>
+    <button class="filter-btn" data-filter="today" onclick="setFilter('today',this)">היום</button>
+    <button class="filter-btn" data-filter="done" onclick="setFilter('done',this)">הושלמו</button>
+  </div>
+
+  <div class="assignments" id="assignmentsList"></div>
+
+  <button class="fab" onclick="refreshAssignments()">
+    🔄 רענן מטלות
+  </button>
+</div>
+
+<!-- ── REMINDER MODAL ── -->
+<div class="modal-overlay" id="reminderModal" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="modalTitle">הגדר תזכורת</div>
+    <div class="modal-sub" id="modalSub">בחר מתי לקבל התראה</div>
+
+    <div class="time-options">
+      <div class="time-opt" data-mins="30" onclick="selectTimeOpt(this)">
+        <div class="time-opt-icon">⚡</div>
+        <div class="time-opt-lbl">30 דקות לפני</div>
+        <div class="time-opt-sub">תזכורת מהירה</div>
+      </div>
+      <div class="time-opt" data-mins="60" onclick="selectTimeOpt(this)">
+        <div class="time-opt-icon">🕐</div>
+        <div class="time-opt-lbl">שעה לפני</div>
+        <div class="time-opt-sub">זמן טוב להתחיל</div>
+      </div>
+      <div class="time-opt" data-mins="1440" onclick="selectTimeOpt(this)">
+        <div class="time-opt-icon">🌅</div>
+        <div class="time-opt-lbl">יום לפני</div>
+        <div class="time-opt-sub">זמן לאגור כוחות</div>
+      </div>
+      <div class="time-opt" data-mins="2880" onclick="selectTimeOpt(this)">
+        <div class="time-opt-icon">📅</div>
+        <div class="time-opt-lbl">יומיים לפני</div>
+        <div class="time-opt-sub">להתחיל מוקדם</div>
+      </div>
+    </div>
+
+    <div class="custom-time-row">
+      <span>⏰</span>
+      <span class="custom-time-label">בחר שעה ספציפית:</span>
+      <input type="datetime-local" class="custom-time-input" id="customTimeInput" onchange="selectCustomTime()">
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="saveReminder()">💾 שמור תזכורת</button>
+      <button class="btn-danger" id="deleteReminderBtn" onclick="deleteReminder()" style="display:none">🗑</button>
+      <button class="btn-secondary" onclick="closeModal()">ביטול</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════
+let assignments = [];
+let reminders = {}; // { assignmentId: { time: ISO, timeoutId: number } }
+let currentFilter = 'all';
+let currentModalId = null;
+let selectedReminderTime = null;
+let accessToken = null;
+let currentUser = null;
+let notifPermission = 'default';
+
+// Subject colors
+const SUBJECT_COLORS = [
+  '#6c63ff','#ff6584','#43e97b','#f7971e','#4facfe',
+  '#fa709a','#30cfd0','#a8edea','#ffd166','#ef476f'
+];
+const subjectColorMap = {};
+
+function getSubjectColor(subject) {
+  if (!subjectColorMap[subject]) {
+    const idx = Object.keys(subjectColorMap).length % SUBJECT_COLORS.length;
+    subjectColorMap[subject] = SUBJECT_COLORS[idx];
+  }
+  return subjectColorMap[subject];
+}
+
+// ════════════════════════════════════════════════
+// PERSISTENCE
+// ════════════════════════════════════════════════
+function loadFromStorage() {
+  const saved = localStorage.getItem('hw_assignments');
+  if (saved) assignments = JSON.parse(saved);
+  const savedR = localStorage.getItem('hw_reminders');
+  if (savedR) reminders = JSON.parse(savedR);
+}
+
+function saveToStorage() {
+  localStorage.setItem('hw_assignments', JSON.stringify(assignments));
+  // Save reminders without timeoutId
+  const toSave = {};
+  for (const id in reminders) {
+    toSave[id] = { time: reminders[id].time };
+  }
+  localStorage.setItem('hw_reminders', JSON.stringify(toSave));
+}
+
+// ════════════════════════════════════════════════
+// GOOGLE SIGN IN
+// ════════════════════════════════════════════════
+function startGoogleSignIn() {
+  // Google OAuth 2.0 implicit flow
+  // You MUST replace these with your own from Google Cloud Console
+  const CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID'; // ← החלף בזה שלך!
+  
+  if (CLIENT_ID === 'YOUR_GOOGLE_CLIENT_ID') {
+    showToast('⚠️ להתחברות אמיתית – הגדר Google Client ID (ראה הוראות)');
+    // Show demo option
+    setTimeout(() => loadDemoMode(), 1500);
+    return;
+  }
+
+  const scopes = [
+    'https://www.googleapis.com/auth/classroom.courses.readonly',
+    'https://www.googleapis.com/auth/classroom.coursework.me.readonly',
+    'profile', 'email'
+  ].join(' ');
+
+  const params = new URLSearchParams({
+    client_id: CLIENT_ID,
+    redirect_uri: window.location.href.split('?')[0],
+    response_type: 'token',
+    scope: scopes,
+    prompt: 'consent'
+  });
+
+  window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params}`;
+}
+
+// Handle OAuth redirect
+function handleOAuthReturn() {
+  const hash = window.location.hash;
+  if (!hash.includes('access_token')) return false;
+  
+  const params = new URLSearchParams(hash.substring(1));
+  accessToken = params.get('access_token');
+  if (!accessToken) return false;
+
+  // Clean URL
+  history.replaceState(null, '', window.location.pathname);
+  return true;
+}
+
+async function fetchGoogleUser() {
+  const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+    headers: { Authorization: `Bearer ${accessToken}` }
+  });
+  return await res.json();
+}
+
+async function fetchClassroomAssignments() {
+  // 1. Get courses
+  const cRes = await fetch(
+    'https://classroom.googleapis.com/v1/courses?courseStates=ACTIVE',
+    { headers: { Authorization: `Bearer ${accessToken}` } }
+  );
+  const cData = await cRes.json();
+  const courses = cData.courses || [];
+
+  const result = [];
+
+  // 2. For each course, get coursework
+  for (const course of courses) {
+    const wRes = await fetch(
+      `https://classroom.googleapis.com/v1/courses/${course.id}/courseWork`,
+      { headers: { Authorization: `Bearer ${accessToken}` } }
+    );
+    const wData = await wRes.json();
+    const works = wData.courseWork || [];
+
+    for (const work of works) {
+      let dueDate = null;
+      if (work.dueDate) {
+        const d = work.dueDate;
+        const t = work.dueTime || { hours: 23, minutes: 59 };
+        dueDate = new Date(d.year, d.month - 1, d.day, t.hours || 23, t.minutes || 59);
+      }
+
+      result.push({
+        id: work.id,
+        title: work.title || 'מטלה ללא שם',
+        description: work.description || '',
+        subject: course.name,
+        dueDate: dueDate ? dueDate.toISOString() : null,
+        done: false,
+        source: 'classroom'
+      });
+    }
+  }
+
+  // Sort by due date
+  result.sort((a, b) => {
+    if (!a.dueDate) return 1;
+    if (!b.dueDate) return -1;
+    return new Date(a.dueDate) - new Date(b.dueDate);
+  });
+
+  return result;
+}
+
+// ════════════════════════════════════════════════
+// DEMO MODE
+// ════════════════════════════════════════════════
+function loadDemoMode() {
+  showScreen('loadingScreen');
+  document.getElementById('loadingText').textContent = 'טוען נתוני דמו...';
+
+  currentUser = { name: 'תלמיד לדוגמה', picture: null, initials: 'ת' };
+
+  const today = new Date();
+  const tomorrow = new Date(today); tomorrow.setDate(today.getDate() + 1);
+  const dayAfter = new Date(today); dayAfter.setDate(today.getDate() + 2);
+  const nextWeek = new Date(today); nextWeek.setDate(today.getDate() + 7);
+  const yesterday = new Date(today); yesterday.setDate(today.getDate() - 1);
+
+  assignments = [
+    {
+      id: 'd1', title: 'פתרון בעיות בגיאומטריה – עמודים 45-48',
+      description: '20 תרגילים בגיאומטריה אנליטית',
+      subject: 'מתמטיקה', dueDate: today.toISOString(), done: false, source: 'demo'
+    },
+    {
+      id: 'd2', title: 'קריאת פרק ה\' ב"בין הדמדומים"',
+      description: 'לקרוא ולסכם בנקודות',
+      subject: 'ספרות', dueDate: today.toISOString(), done: false, source: 'demo'
+    },
+    {
+      id: 'd3', title: 'Write an essay about climate change',
+      description: '300 words minimum, MLA format',
+      subject: 'אנגלית', dueDate: tomorrow.toISOString(), done: false, source: 'demo'
+    },
+    {
+      id: 'd4', title: 'שאלות על מלחמת יום הכיפורים',
+      description: 'שאלות 1-10 בדף העבודה',
+      subject: 'היסטוריה', dueDate: tomorrow.toISOString(), done: false, source: 'demo'
+    },
+    {
+      id: 'd5', title: 'ניסוי חומצה-בסיס – דוח מעבדה',
+      description: 'כולל גרפים ומסקנות',
+      subject: 'כימיה', dueDate: dayAfter.toISOString(), done: false, source: 'demo'
+    },
+    {
+      id: 'd6', title: 'תרגום טקסט לטינית',
+      description: 'שיר ה-3 של וירגיל',
+      subject: 'לטינית', dueDate: nextWeek.toISOString(), done: false, source: 'demo'
+    },
+    {
+      id: 'd7', title: 'חזרה על הפרק הראשון',
+      description: 'כל הנוסחאות',
+      subject: 'פיזיקה', dueDate: yesterday.toISOString(), done: true, source: 'demo'
+    }
+  ];
+
+  saveToStorage();
+  setTimeout(() => initApp(), 800);
+}
+
+// ════════════════════════════════════════════════
+// NOTIFICATIONS
+// ════════════════════════════════════════════════
+async function requestNotifPermission() {
+  if (!('Notification' in window)) {
+    showToast('❌ הדפדפן שלך לא תומך בהתראות');
+    return false;
+  }
+
+  if (Notification.permission === 'granted') {
+    notifPermission = 'granted';
+    return true;
+  }
+
+  const perm = await Notification.requestPermission();
+  notifPermission = perm;
+  return perm === 'granted';
+}
+
+function scheduleNotification(assignment, reminderTime) {
+  const delay = new Date(reminderTime).getTime() - Date.now();
+  if (delay <= 0) {
+    showToast('⚠️ הזמן שנבחר כבר עבר');
+    return null;
+  }
+
+  // Cancel existing
+  if (reminders[assignment.id]?.timeoutId) {
+    clearTimeout(reminders[assignment.id].timeoutId);
+  }
+
+  const timeoutId = setTimeout(() => {
+    fireNotification(assignment);
+  }, delay);
+
+  return timeoutId;
+}
+
+function fireNotification(assignment) {
+  // In-app toast always
+  showToast(`🔔 תזכורת: ${assignment.title}`);
+
+  // System notification if permitted
+  if (Notification.permission === 'granted') {
+    const dueText = assignment.dueDate
+      ? `להגשה: ${formatDue(assignment.dueDate)}`
+      : 'אין תאריך הגשה';
+
+    const notif = new Notification(`📚 מטלה: ${assignment.subject}`, {
+      body: `${assignment.title}\n${dueText}`,
+      icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">📚</text></svg>',
+      badge: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">📚</text></svg>',
+      tag: `hw_${assignment.id}`,
+      requireInteraction: true,
+      vibrate: [200, 100, 200, 100, 200]
+    });
+
+    notif.onclick = () => {
+      window.focus();
+      notif.close();
+    };
+  }
+}
+
+// Register service worker for background notifications
+function registerServiceWorker() {
+  if (!('serviceWorker' in navigator)) return;
+  
+  // Inline SW as blob
+  const swCode = `
+self.addEventListener('install', e => self.skipWaiting());
+self.addEventListener('activate', e => e.waitUntil(clients.claim()));
+
+// Background sync for scheduled notifications
+self.addEventListener('message', e => {
+  if (e.data.type === 'SCHEDULE') {
+    const { id, title, subject, time } = e.data;
+    const delay = new Date(time).getTime() - Date.now();
+    if (delay > 0) {
+      setTimeout(() => {
+        self.registration.showNotification('📚 ' + subject, {
+          body: title,
+          tag: 'hw_' + id,
+          requireInteraction: true,
+          vibrate: [200, 100, 200]
+        });
+      }, delay);
+    }
+  }
+});
+  `;
+  
+  const blob = new Blob([swCode], { type: 'application/javascript' });
+  const swUrl = URL.createObjectURL(blob);
+  navigator.serviceWorker.register(swUrl).catch(() => {});
+}
+
+// ════════════════════════════════════════════════
+// UI HELPERS
+// ════════════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+let toastTimeout;
+function showToast(msg, duration = 3000) {
+  const toast = document.getElementById('toast');
+  document.getElementById('toastText').textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => toast.classList.remove('show'), duration);
+}
+
+function formatDue(isoDate) {
+  if (!isoDate) return 'אין תאריך';
+  const d = new Date(isoDate);
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const dDay = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const diff = Math.round((dDay - today) / (1000 * 60 * 60 * 24));
+
+  const time = d.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+
+  if (diff < 0) return `עבר לפני ${-diff} ימים`;
+  if (diff === 0) return `היום בשעה ${time}`;
+  if (diff === 1) return `מחר בשעה ${time}`;
+  if (diff <= 7) return `בעוד ${diff} ימים`;
+  return d.toLocaleDateString('he-IL', { day: 'numeric', month: 'short' });
+}
+
+function getDueClass(isoDate) {
+  if (!isoDate) return '';
+  const d = new Date(isoDate);
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const dDay = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const diff = Math.round((dDay - today) / (1000 * 60 * 60 * 24));
+  if (diff < 0) return 'urgent';
+  if (diff === 0) return 'today';
+  if (diff === 1) return 'urgent';
+  return '';
+}
+
+function groupByDay(list) {
+  const groups = {};
+  for (const a of list) {
+    const key = a.dueDate
+      ? new Date(a.dueDate).toDateString()
+      : 'no-date';
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(a);
+  }
+  return groups;
+}
+
+function dayLabel(dateStr) {
+  if (dateStr === 'no-date') return 'ללא תאריך';
+  const d = new Date(dateStr);
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const dDay = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const diff = Math.round((dDay - today) / (1000 * 60 * 60 * 24));
+  if (diff < 0) return `איחור – ${d.toLocaleDateString('he-IL', { day: 'numeric', month: 'long' })}`;
+  if (diff === 0) return '📅 היום';
+  if (diff === 1) return '⏰ מחר';
+  return d.toLocaleDateString('he-IL', { weekday: 'long', day: 'numeric', month: 'long' });
+}
+
+// ════════════════════════════════════════════════
+// RENDER
+// ════════════════════════════════════════════════
+function renderAssignments() {
+  const container = document.getElementById('assignmentsList');
+  
+  let filtered = assignments;
+  if (currentFilter === 'pending') filtered = assignments.filter(a => !a.done);
+  else if (currentFilter === 'done') filtered = assignments.filter(a => a.done);
+  else if (currentFilter === 'today') {
+    filtered = assignments.filter(a => {
+      if (!a.dueDate) return false;
+      const d = new Date(a.dueDate);
+      const now = new Date();
+      return d.toDateString() === now.toDateString();
+    });
+  }
+
+  // Sort: pending first by date, then done
+  filtered.sort((a, b) => {
+    if (a.done !== b.done) return a.done ? 1 : -1;
+    if (!a.dueDate) return 1;
+    if (!b.dueDate) return -1;
+    return new Date(a.dueDate) - new Date(b.dueDate);
+  });
+
+  // Update stats
+  const total = assignments.length;
+  const done = assignments.filter(a => a.done).length;
+  const pending = total - done;
+  const rCount = Object.keys(reminders).filter(id => {
+    const r = reminders[id];
+    return r && r.time && new Date(r.time) > new Date();
+  }).length;
+
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statPending').textContent = pending;
+  document.getElementById('statDone').textContent = done;
+  document.getElementById('statReminders').textContent = rCount;
+
+  if (filtered.length === 0) {
+    container.innerHTML = `
+      <div class="empty">
+        <div class="empty-icon">${currentFilter === 'done' ? '🎉' : '✨'}</div>
+        <div class="empty-text">${currentFilter === 'done' ? 'עוד אין מטלות שהושלמו' : 'אין מטלות להצגה!'}</div>
+      </div>`;
+    return;
+  }
+
+  const groups = groupByDay(filtered);
+  let html = '';
+
+  for (const [dateStr, items] of Object.entries(groups)) {
+    html += `<div class="day-group">`;
+    html += `<div class="day-label">${dayLabel(dateStr)}</div>`;
+    for (const a of items) {
+      const color = getSubjectColor(a.subject);
+      const dueClass = a.done ? '' : getDueClass(a.dueDate);
+      const hasReminder = reminders[a.id] && reminders[a.id].time && new Date(reminders[a.id].time) > new Date();
+      html += `
+        <div class="card ${a.done ? 'done' : ''}" style="--subject-color:${color}">
+          <div class="card-top">
+            <button class="check-btn" onclick="toggleDone('${a.id}',event)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </button>
+            <div class="card-info">
+              <div class="card-subject">${a.subject}</div>
+              <div class="card-title">${a.title}</div>
+              ${a.description ? `<div class="card-desc">${a.description.slice(0, 80)}${a.description.length > 80 ? '...' : ''}</div>` : ''}
+            </div>
+          </div>
+          <div class="card-bottom">
+            <div class="card-due ${dueClass}">
+              📅 ${formatDue(a.dueDate)}
+            </div>
+            ${!a.done ? `
+              <button class="remind-btn ${hasReminder ? 'set' : ''}" onclick="openReminder('${a.id}',event)">
+                ${hasReminder ? '🔔 יש תזכורת' : '+ תזכורת'}
+              </button>
+            ` : ''}
+          </div>
+          ${a.source === 'classroom' ? '<div class="source-badge">Classroom</div>' : ''}
+        </div>`;
+    }
+    html += `</div>`;
+  }
+
+  container.innerHTML = html;
+}
+
+// ════════════════════════════════════════════════
+// ACTIONS
+// ════════════════════════════════════════════════
+function toggleDone(id, e) {
+  e.stopPropagation();
+  const a = assignments.find(x => x.id === id);
+  if (!a) return;
+  a.done = !a.done;
+  if (a.done) {
+    showToast(`✅ "${a.title}" סומן כהושלם!`);
+    // Cancel reminder
+    if (reminders[id]?.timeoutId) {
+      clearTimeout(reminders[id].timeoutId);
+      delete reminders[id];
+    }
+  }
+  saveToStorage();
+  renderAssignments();
+}
+
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderAssignments();
+}
+
+async function refreshAssignments() {
+  if (!accessToken) {
+    showToast('📡 במצב דמו – אין חיבור ל-Classroom');
+    return;
+  }
+  showToast('🔄 מרענן מטלות...');
+  try {
+    const fresh = await fetchClassroomAssignments();
+    // Merge: keep done status of existing
+    for (const f of fresh) {
+      const existing = assignments.find(a => a.id === f.id);
+      if (existing) f.done = existing.done;
+    }
+    assignments = fresh;
+    saveToStorage();
+    renderAssignments();
+    showToast(`✅ נטענו ${fresh.length} מטלות מ-Classroom`);
+  } catch (err) {
+    showToast('❌ שגיאה בטעינת מטלות');
+  }
+}
+
+// ════════════════════════════════════════════════
+// REMINDER MODAL
+// ════════════════════════════════════════════════
+async function openReminder(id, e) {
+  e.stopPropagation();
+
+  // Request permission first
+  const granted = await requestNotifPermission();
+  if (!granted) {
+    showToast('⚠️ יש לאפשר התראות בדפדפן כדי לקבוע תזכורות');
+    return;
+  }
+
+  currentModalId = id;
+  selectedReminderTime = null;
+  const a = assignments.find(x => x.id === id);
+  if (!a) return;
+
+  document.getElementById('modalTitle').textContent = '🔔 תזכורת';
+  document.getElementById('modalSub').textContent = a.title.slice(0, 50);
+
+  // Pre-select if exists
+  document.querySelectorAll('.time-opt').forEach(o => o.classList.remove('selected'));
+
+  // Show delete btn if reminder exists
+  const hasR = reminders[id] && reminders[id].time;
+  document.getElementById('deleteReminderBtn').style.display = hasR ? 'block' : 'none';
+
+  // Set min for custom input
+  const now = new Date();
+  now.setMinutes(now.getMinutes() + 5);
+  const minStr = now.toISOString().slice(0, 16);
+  document.getElementById('customTimeInput').min = minStr;
+
+  // Default custom to 1 day before due if exists
+  if (a.dueDate) {
+    const d = new Date(a.dueDate);
+    d.setDate(d.getDate() - 1);
+    if (d > new Date()) {
+      document.getElementById('customTimeInput').value = d.toISOString().slice(0, 16);
+    }
+  }
+
+  document.getElementById('reminderModal').classList.add('open');
+}
+
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('reminderModal')) return;
+  document.getElementById('reminderModal').classList.remove('open');
+  currentModalId = null;
+  selectedReminderTime = null;
+}
+
+function selectTimeOpt(el) {
+  document.querySelectorAll('.time-opt').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('customTimeInput').value = '';
+
+  const a = assignments.find(x => x.id === currentModalId);
+  if (!a || !a.dueDate) {
+    showToast('⚠️ מטלה זו אין לה תאריך הגשה – בחר שעה ספציפית');
+    el.classList.remove('selected');
+    return;
+  }
+
+  const mins = parseInt(el.dataset.mins);
+  const reminderTime = new Date(a.dueDate);
+  reminderTime.setMinutes(reminderTime.getMinutes() - mins);
+  selectedReminderTime = reminderTime.toISOString();
+}
+
+function selectCustomTime() {
+  document.querySelectorAll('.time-opt').forEach(o => o.classList.remove('selected'));
+  const val = document.getElementById('customTimeInput').value;
+  if (val) selectedReminderTime = new Date(val).toISOString();
+}
+
+async function saveReminder() {
+  if (!selectedReminderTime) {
+    showToast('⚠️ בחר זמן לתזכורת');
+    return;
+  }
+
+  const a = assignments.find(x => x.id === currentModalId);
+  if (!a) return;
+
+  const timeoutId = scheduleNotification(a, selectedReminderTime);
+  if (!timeoutId) return;
+
+  reminders[currentModalId] = { time: selectedReminderTime, timeoutId };
+  saveToStorage();
+
+  const reminderDate = new Date(selectedReminderTime);
+  const formatted = reminderDate.toLocaleString('he-IL', {
+    day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit'
+  });
+  showToast(`🔔 תזכורת נקבעה ל-${formatted}`);
+
+  document.getElementById('reminderModal').classList.remove('open');
+  renderAssignments();
+}
+
+function deleteReminder() {
+  if (!currentModalId) return;
+  if (reminders[currentModalId]?.timeoutId) {
+    clearTimeout(reminders[currentModalId].timeoutId);
+  }
+  delete reminders[currentModalId];
+  saveToStorage();
+  showToast('🗑️ תזכורת נמחקה');
+  document.getElementById('reminderModal').classList.remove('open');
+  renderAssignments();
+}
+
+// ════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════
+function initApp() {
+  // Set user info
+  if (currentUser) {
+    document.getElementById('userName').textContent = currentUser.name?.split(' ')[0] || 'משתמש';
+    const avatar = document.getElementById('userAvatar');
+    if (currentUser.picture) {
+      avatar.innerHTML = `<img src="${currentUser.picture}" alt="">`;
+    } else {
+      avatar.textContent = currentUser.initials || currentUser.name?.[0] || 'מ';
+    }
+  }
+
+  // Restore saved reminders & reschedule
+  for (const id in reminders) {
+    const r = reminders[id];
+    if (!r.time || new Date(r.time) <= new Date()) {
+      delete reminders[id];
+      continue;
+    }
+    const a = assignments.find(x => x.id === id);
+    if (a) {
+      const tid = scheduleNotification(a, r.time);
+      if (tid) reminders[id].timeoutId = tid;
+    }
+  }
+
+  showScreen('appScreen');
+  renderAssignments();
+  registerServiceWorker();
+}
+
+function signOut() {
+  if (!confirm('להתנתק?')) return;
+  accessToken = null;
+  currentUser = null;
+  localStorage.removeItem('hw_assignments');
+  localStorage.removeItem('hw_reminders');
+  assignments = [];
+  reminders = {};
+  showScreen('loginScreen');
+}
+
+// ════════════════════════════════════════════════
+// STARTUP
+// ════════════════════════════════════════════════
+window.addEventListener('load', async () => {
+  loadFromStorage();
+
+  // Check if returning from OAuth
+  if (handleOAuthReturn()) {
+    showScreen('loadingScreen');
+    document.getElementById('loadingText').textContent = 'טוען פרטי חשבון...';
+    try {
+      currentUser = await fetchGoogleUser();
+      currentUser.initials = currentUser.name?.[0] || 'מ';
+      document.getElementById('loadingText').textContent = 'טוען מטלות מ-Classroom...';
+      const fetched = await fetchClassroomAssignments();
+      // Merge
+      for (const f of fetched) {
+        const ex = assignments.find(a => a.id === f.id);
+        if (ex) f.done = ex.done;
+      }
+      assignments = fetched;
+      saveToStorage();
+      initApp();
+    } catch (err) {
+      showScreen('loginScreen');
+      showToast('❌ שגיאה בטעינה – נסה שוב');
+    }
+    return;
+  }
+
+  // Already have saved data → go to app
+  if (assignments.length > 0) {
+    currentUser = { name: 'מטלות שמורות', initials: '📚' };
+    initApp();
+    return;
+  }
+
+  showScreen('loginScreen');
+});
+</script>
+</body>
+</html>
